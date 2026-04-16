@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Aim Trainer Pro</title>
+
+<style>
+body {
+  margin: 0;
+  background: #020617;
+  color: white;
+  font-family: Arial;
+  text-align: center;
+}
+
+#game {
+  width: 100%;
+  height: 80vh;
+  position: relative;
+}
+
+.target {
+  width: 60px;
+  height: 60px;
+  background: #38bdf8;
+  border-radius: 50%;
+  position: absolute;
+  cursor: crosshair;
+  box-shadow: 0 0 20px #38bdf8;
+}
+
+.hit {
+  animation: hit 0.2s ease;
+}
+
+@keyframes hit {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+
+.info {
+  margin-top: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>AIM TRAINER PRO</h1>
+
+<div class="info">
+Score: <span id="score">0</span> |
+Time: <span id="time">30</span> |
+Accuracy: <span id="acc">100%</span> |
+Combo: <span id="combo">0</span>
+</div>
+
+<div id="game"></div>
+
+<script>
+const game = document.getElementById("game");
+
+let score = 0;
+let time = 30;
+let hits = 0;
+let shots = 0;
+let combo = 0;
+let speed = 1000;
+
+function spawnTarget() {
+  if (time <= 0) return;
+
+  const target = document.createElement("div");
+  target.classList.add("target");
+
+  const x = Math.random() * (game.clientWidth - 60);
+  const y = Math.random() * (game.clientHeight - 60);
+
+  target.style.left = x + "px";
+  target.style.top = y + "px";
+
+  target.onclick = () => {
+    hits++;
+    shots++;
+    combo++;
+
+    score += 1 + Math.floor(combo / 3);
+
+    updateUI();
+
+    target.classList.add("hit");
+
+    setTimeout(() => {
+      target.remove();
+      spawnTarget();
+    }, 100);
+
+    speed *= 0.97; // gittikçe zorlaşır
+  };
+
+  game.appendChild(target);
+
+  setTimeout(() => {
+    if (target.parentNode) {
+      target.remove();
+      shots++;
+      combo = 0;
+      updateUI();
+      spawnTarget();
+    }
+  }, speed);
+}
+
+function updateUI() {
+  document.getElementById("score").textContent = score;
+  document.getElementById("combo").textContent = combo;
+
+  let acc = shots > 0 ? Math.floor((hits / shots) * 100) : 100;
+  document.getElementById("acc").textContent = acc + "%";
+}
+
+// Timer
+const timer = setInterval(() => {
+  time--;
+  document.getElementById("time").textContent = time;
+
+  if (time <= 0) {
+    clearInterval(timer);
+    alert("Bitti!\nScore: " + score);
+  }
+}, 1000);
+
+spawnTarget();
+</script>
+
+</body>
+</html>
